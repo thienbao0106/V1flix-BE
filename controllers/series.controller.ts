@@ -35,13 +35,19 @@ export const SeriesController = {
         attributes: { exclude: ["season"] },
         order: [["id", "desc"]],
       });
-      const totalItem = Math.round(data.count / 3);
+
+      const totalItem: number = Math.floor(data.count / 3);
+      const totalPage: number = Math.floor(
+        data.rows.length / parseInt(limitPage)
+      );
+      console.log(totalItem);
+      console.log(data.rows.length === limitPage);
       if (data) {
         console.log("Query successfully");
         res.json({
           status: "success",
-          count: totalItem,
-          totalPage: Math.round(totalItem / parseInt(limitPage)),
+          count: data.rows.length,
+          totalPage: totalItem % limitPage === 0 ? totalPage : totalPage + 1,
           series: data.rows,
         });
       }
