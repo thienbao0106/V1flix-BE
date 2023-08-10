@@ -7,5 +7,8 @@ export const EpisodesRoutes = (app: Express) => {
     EpisodesController.getEpisodeById
   );
   router.get("/api/episodes", EpisodesController.getEpisodes);
+  router.post("/api/episodes/create", EpisodesController.createEpisode);
+  router.delete("/api/episodes/delete", EpisodesController.deleteEpisode);
+  router.put("/api/episodes/update", EpisodesController.updateEpisode);
   app.use(router);
 };

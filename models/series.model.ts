@@ -7,6 +7,7 @@ export const Series = sequelize.define(
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
+      autoIncrement: true,
     },
     title: {
       type: DataTypes.STRING,
@@ -24,6 +25,9 @@ export const Series = sequelize.define(
       type: DataTypes.INTEGER,
     },
     status: {
+      type: DataTypes.STRING,
+    },
+    season: {
       type: DataTypes.STRING,
     },
   },

@@ -8,18 +8,22 @@ export const Episodes = sequelize.define(
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
+      autoIncrement: true,
     },
     title: {
       type: DataTypes.STRING,
+      unique: true,
     },
     ep_num: {
       type: DataTypes.INTEGER,
+      unique: true,
     },
     source: {
       type: DataTypes.STRING,
     },
     seriesId: {
       type: DataTypes.INTEGER,
+      unique: true,
       references: {
         model: Series,
         key: "id",

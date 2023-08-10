@@ -4,6 +4,7 @@ import { ISeries } from "../interface";
 import { Request, Response } from "express";
 import { Series } from "../models/series.model";
 import { FilmsGeners } from "../models/films_geners.model";
+import { createImagesData } from "../middleware/handleCreate";
 const { Op } = require("sequelize");
 export const SeriesController = {
   getAllSeries: async (req: Request, res: Response) => {
@@ -104,21 +105,20 @@ export const SeriesController = {
     try {
       console.log(req.body);
       const { status, filter, genre } = req.body;
-      console.log(status);
+      console.log("table name: ", FilmsGeners.getTableName());
       const hasStatus = status !== "" && { status };
       const hasGenere = genre !== "" && {
-        model: FilmsGeners,
         where: {
           generId: genre,
         },
       };
+
       const data: ISeries[] = await Series.findAll({
         where: {
           title: { [Op.like]: `%${filter}%` },
           ...hasStatus,
-          ...hasGenere,
         },
-        include: [{ model: Images }],
+        include: [{ model: FilmsGeners, ...hasGenere }, { model: Images }],
       });
       if (data) {
         console.log("Find all series successfully");
@@ -140,8 +140,14 @@ export const SeriesController = {
       });
       console.log(created);
       if (created) {
-        console.log("Create successfully");
-        res.status(200).json({ status: "success", series: series });
+        const images = createImagesData(series.title, series.id);
+        const imageResponse = Images.bulkCreate(images);
+        if (imageResponse) {
+          console.log("Create successfully");
+          res.status(200).json({ status: "success", series: series });
+        } else {
+          res.status(400).json({ status: "failed", msg: "Image error" });
+        }
       } else {
         res.status(400).json({ status: "failed", msg: "Series existed" });
       }
@@ -185,13 +191,26 @@ export const SeriesController = {
         },
       });
       if (search) {
-        const result = await Series.destroy({
+        const imageResult = await Images.destroy({
           where: {
-            id: req.body.id,
+            seriesId: req.body.id,
           },
         });
-        console.log(result);
-        res.status(200).json({ status: "success", msg: "Delete successfully" });
+        if (imageResult) {
+          const result = await Series.destroy({
+            where: {
+              id: req.body.id,
+            },
+          });
+
+          res
+            .status(200)
+            .json({ status: "success", msg: "Delete successfully" });
+        } else {
+          res
+            .status(400)
+            .json({ status: "failed", msg: "Images can't be deleted" });
+        }
       } else {
         res
           .status(400)
