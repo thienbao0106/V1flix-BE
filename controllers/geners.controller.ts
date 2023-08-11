@@ -1,3 +1,4 @@
+import { createData } from "../middleware/handleCreate";
 import { FilmsGeners } from "../models/films_geners.model";
 import { Images } from "../models/images.model";
 import { Series } from "../models/series.model";
@@ -51,6 +52,93 @@ export const GenersController = {
         });
     } else {
       res.json({ status: "failed" });
+    }
+  },
+  createGener: async (req: Request, res: Response) => {
+    try {
+      const { name } = req.body;
+      const capitalName = `${name.charAt(0).toUpperCase()}${name.slice(1)}`;
+      const newData = {
+        name: capitalName,
+      };
+
+      await createData(Geners, newData, newData, {
+        response: res,
+        dataSuccess: {
+          status: "success",
+          message: "Add successfully",
+        },
+        dataFailed: {
+          status: "error",
+          message: "Can't create a duplicated geners",
+        },
+      });
+    } catch (error: any) {
+      throw new Error(error);
+    }
+  },
+  deleteGener: async (req: Request, res: Response) => {
+    try {
+      const findGener = await Geners.findOne({
+        where: {
+          id: req.body.id,
+        },
+      });
+      if (findGener) {
+        await FilmsGeners.destroy({
+          where: {
+            generId: req.body.id,
+          },
+        });
+        await Geners.destroy({
+          where: {
+            id: req.body.id,
+          },
+        });
+        res.json({
+          status: "success",
+          message: "Delete successfully",
+        });
+      } else {
+        res.json({
+          status: "error",
+          message: "Can't find this gener to delete",
+        });
+      }
+    } catch (error: any) {}
+  },
+  updateGener: async (req: Request, res: Response) => {
+    try {
+      const { name } = req.body;
+
+      const capitalName = `${name.charAt(0).toUpperCase()}${name.slice(1)}`;
+      const found = await Geners.findOne({
+        where: {
+          name: capitalName,
+        },
+      });
+      console.log(found);
+      if (!found) {
+        const response = await Geners.update(
+          {
+            name: capitalName,
+          },
+          {
+            where: {
+              id: req.body.id,
+            },
+          }
+        );
+        if (response) {
+          res.json({ status: "success", message: "Edit a gener successfully" });
+        } else {
+          res.json({ status: "error", message: "Can't edit this gener" });
+        }
+      } else {
+        res.json({ status: "error", message: "Name is dupilcated" });
+      }
+    } catch (error: any) {
+      throw new Error(error);
     }
   },
 };
