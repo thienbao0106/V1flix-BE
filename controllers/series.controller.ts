@@ -5,6 +5,7 @@ import { Request, Response } from "express";
 import { Series } from "../models/series.model";
 import { FilmsGeners } from "../models/films_geners.model";
 import { createImagesData } from "../middleware/handleCreate";
+import { Lists } from "../models/lists.model";
 const { Op } = require("sequelize");
 export const SeriesController = {
   getAllSeries: async (req: Request, res: Response) => {
@@ -191,26 +192,36 @@ export const SeriesController = {
         },
       });
       if (search) {
-        const imageResult = await Images.destroy({
+        //will fix this one soon
+        await Images.destroy({
           where: {
             seriesId: req.body.id,
           },
         });
-        if (imageResult) {
-          const result = await Series.destroy({
-            where: {
-              id: req.body.id,
-            },
-          });
-
+        await Lists.destroy({
+          where: {
+            seriesId: req.body.id,
+          },
+        });
+        await FilmsGeners.destroy({
+          where: {
+            seriesId: req.body.id,
+          },
+        });
+        await Episodes.destroy({
+          where: {
+            seriesId: req.body.id,
+          },
+        });
+        const result = await Series.destroy({
+          where: {
+            id: req.body.id,
+          },
+        });
+        if (result)
           res
             .status(200)
             .json({ status: "success", msg: "Delete successfully" });
-        } else {
-          res
-            .status(400)
-            .json({ status: "failed", msg: "Images can't be deleted" });
-        }
       } else {
         res
           .status(400)

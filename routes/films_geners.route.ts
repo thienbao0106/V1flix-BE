@@ -7,5 +7,10 @@ export const FilmsGenersRoutes = (app: Express) => {
     "/api/film/get-geners/:seriesId",
     FilmsGenersController.getFilmsGeners
   );
+  router.post("/api/film/add-gener", FilmsGenersController.createFilmGeners);
+  router.delete(
+    "/api/film/delete-gener",
+    FilmsGenersController.deleteFilmGeners
+  );
   app.use(router);
 };
